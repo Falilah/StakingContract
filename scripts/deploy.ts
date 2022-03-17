@@ -33,7 +33,7 @@ async function main() {
 
   const transfer_ = await deployStaking.transfer(boredaper, "1000000000000");
   // console.log(transfer_);
-  const stake = await deployStaking.connect(border).stakeBRT("1000000000000");
+  const stake = await deployStaking.connect(border).stakeBRT("1000000000");
 
   const bal = await deployStaking.balanceOf(boredaper);
   const contractbal = await deployStaking.balanceOf(deployStaking.address);

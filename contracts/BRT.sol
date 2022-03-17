@@ -17,45 +17,60 @@ contract BoaredApe is ERC20 {
     struct Stakers {
         uint256 time;
         address owner;
-        mapping(address => uint256) stakers;
+        uint256 stakeAmount;
         bool valid;
     }
-    mapping(uint256 => Stakers) public stakers;
-    uint256 private id = 1;
+    mapping(address => Stakers) public stakers;
+    event stateChange(address from, address to, uint256 a_mount);
+
+    address[] public _Stakers;
 
     function stakeBRT(uint256 amount) public {
-        Stakers storage s = stakers[id];
+        Stakers storage s = stakers[msg.sender];
         require(_balances[msg.sender] >= amount, "insufficient");
         require(ape.balanceOf(msg.sender) >= 1, "not a boredape holder");
-        _balances[msg.sender] -= amount;
-        s.stakers[msg.sender] += amount;
-        s.owner = msg.sender;
+        address checkOwner;
+        for (uint256 i; i < _Stakers.length; i++) {
+            if (_Stakers[i] == msg.sender) checkOwner = _Stakers[i];
+        }
+        if (msg.sender == checkOwner) {
+            uint256 daySpent = block.timestamp - s.time;
+            uint256 token = s.stakeAmount;
+
+            if (daySpent >= 3 days) {
+                uint256 interest = ((token * (daySpent / 86400)) / 300);
+                uint256 total = token + interest + amount;
+                s.stakeAmount = total;
+            } else {
+                s.stakeAmount = token + amount;
+            }
+        } else {
+            _balances[msg.sender] -= amount;
+            s.stakeAmount = amount;
+            s.owner = msg.sender;
+            _Stakers.push(msg.sender);
+        }
         s.time = block.timestamp;
-        s.valid = true;
-        id++;
+        emit stateChange(msg.sender, address(this), amount);
     }
 
-    function withdraw(uint256 _id, uint256 amount)
-        public
-        returns (uint256 total)
-    {
-        Stakers storage s = stakers[_id];
+    function withdraw(uint256 amount) public returns (uint256 total) {
+        Stakers storage s = stakers[msg.sender];
 
         require(msg.sender == s.owner, "Not owner");
         require(s.valid == true, "you dont have money in the stake");
         uint256 daySpent = block.timestamp - s.time;
         if (daySpent >= 3 days) {
-            uint256 token = s.stakers[msg.sender];
+            uint256 token = s.stakeAmount;
             uint256 interest = ((token * (daySpent / 86400)) / 300);
             total = token + interest;
-            s.stakers[msg.sender] = total;
+            s.stakeAmount = total;
         }
 
-        s.stakers[msg.sender] -= amount;
+        s.stakeAmount -= amount;
         _balances[msg.sender] += amount;
         _balances[address(this)] -= amount;
         s.time = block.timestamp;
-        s.stakers[msg.sender] == 0 ? false : true;
+        s.stakeAmount == 0 ? false : true;
     }
-    // uint256 interest = (token * (daySpent / 30 days) * 10000) / 100;
 }
