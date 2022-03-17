@@ -4,11 +4,12 @@ import { ethers } from "hardhat";
 
 async function main() {
   // We get the contract to deploy
+  // const owner = "0x27E936b199a8EEb3980c468fc1802f1Ef78b1625";
+  const owner = (await ethers.getSigners())[0].address;
 
-  const owner = "0x27E936b199a8EEb3980c468fc1802f1Ef78b1625";
   const boredaper = "0xcee749f1cfc66cd3fb57cefde8a9c5999fbe7b8f";
 
-  await ethers.getSigners;
+  const signerss = await ethers.getSigners;
 
   //@ts-ignore
   await network.provider.send("hardhat_setBalance", [
@@ -31,16 +32,13 @@ async function main() {
   console.log("staking address", deployStaking.address);
 
   const transfer_ = await deployStaking.transfer(boredaper, "1000000000000");
-  console.log(transfer_);
+  // console.log(transfer_);
   const stake = await deployStaking.connect(border).stakeBRT("1000000000000");
 
-  console.log(stake);
   const bal = await deployStaking.balanceOf(boredaper);
   const contractbal = await deployStaking.balanceOf(deployStaking.address);
   const ownerbal = await deployStaking.balanceOf(owner);
   console.log(bal, contractbal, ownerbal);
-
-  console.log(minter);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

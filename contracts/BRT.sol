@@ -27,6 +27,7 @@ contract BoaredApe is ERC20 {
         Stakers storage s = stakers[id];
         require(_balances[msg.sender] >= amount, "insufficient");
         require(ape.balanceOf(msg.sender) >= 1, "not a boredape holder");
+        _balances[msg.sender] -= amount;
         s.stakers[msg.sender] += amount;
         s.owner = msg.sender;
         s.time = block.timestamp;
@@ -45,19 +46,16 @@ contract BoaredApe is ERC20 {
         uint256 daySpent = block.timestamp - s.time;
         if (daySpent >= 3 days) {
             uint256 token = s.stakers[msg.sender];
-            uint256 interest = (token * (daySpent / 30 days) * 10) / 100;
+            uint256 interest = ((token * (daySpent / 86400)) / 300);
             total = token + interest;
             s.stakers[msg.sender] = total;
-            s.stakers[msg.sender] -= amount;
-            _balances[msg.sender] += amount;
-            s.time = block.timestamp;
-            s.stakers[msg.sender] == 0 ? false : true;
-        } else {
-            s.stakers[msg.sender] -= amount;
-            _balances[msg.sender] += amount;
-            s.time = block.timestamp;
-            s.stakers[msg.sender] == 0 ? false : true;
         }
+
+        s.stakers[msg.sender] -= amount;
+        _balances[msg.sender] += amount;
+        _balances[address(this)] -= amount;
+        s.time = block.timestamp;
+        s.stakers[msg.sender] == 0 ? false : true;
     }
     // uint256 interest = (token * (daySpent / 30 days) * 10000) / 100;
 }
