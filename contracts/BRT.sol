@@ -4,7 +4,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./IBored.sol";
 
 contract BoaredApe is ERC20 {
-    address bored = 0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D;
+    address private bored = 0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D;
     IBRT private ape = IBRT(bored);
 
     constructor(string memory _name, string memory _symbol)
@@ -19,39 +19,37 @@ contract BoaredApe is ERC20 {
         address owner;
         uint256 stakeAmount;
         bool valid;
+        mapping(address => bool) staker_;
     }
     mapping(address => Stakers) public stakers;
-    event stateChange(address from, address to, uint256 a_mount);
-
-    address[] public _Stakers;
+    event StateChange(address from, address to, uint256 _mount);
 
     function stakeBRT(uint256 amount) public {
         Stakers storage s = stakers[msg.sender];
-        require(_balances[msg.sender] >= amount, "insufficient");
+        require(_balances[msg.sender] >= amount, "insufficien t");
         require(ape.balanceOf(msg.sender) >= 1, "not a boredape holder");
-        address checkOwner;
-        for (uint256 i; i < _Stakers.length; i++) {
-            if (_Stakers[i] == msg.sender) checkOwner = _Stakers[i];
-        }
-        if (msg.sender == checkOwner) {
+
+        if (s.staker_[msg.sender] == true) {
             uint256 daySpent = block.timestamp - s.time;
             uint256 token = s.stakeAmount;
+            _balances[msg.sender] -= amount;
 
             if (daySpent >= 3 days) {
                 uint256 interest = ((token * (daySpent / 86400)) / 300);
                 uint256 total = token + interest + amount;
                 s.stakeAmount = total;
             } else {
-                s.stakeAmount = token + amount;
+                s.stakeAmount += amount;
             }
         } else {
             _balances[msg.sender] -= amount;
             s.stakeAmount = amount;
             s.owner = msg.sender;
-            _Stakers.push(msg.sender);
+            s.staker_[msg.sender] = true;
         }
+        _balances[address(this)] += amount;
         s.time = block.timestamp;
-        emit stateChange(msg.sender, address(this), amount);
+        emit StateChange(msg.sender, address(this), amount);
     }
 
     function withdraw(uint256 amount) public returns (uint256 total) {
@@ -68,9 +66,10 @@ contract BoaredApe is ERC20 {
         }
 
         s.stakeAmount -= amount;
-        _balances[msg.sender] += amount;
         _balances[address(this)] -= amount;
+        _balances[msg.sender] += amount;
         s.time = block.timestamp;
         s.stakeAmount == 0 ? false : true;
+        emit StateChange(address(this), msg.sender, amount);
     }
 }
