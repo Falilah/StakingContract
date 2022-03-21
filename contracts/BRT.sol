@@ -51,7 +51,7 @@ contract BoaredApe is ERC20 {
         emit StateChange(msg.sender, address(this), amount);
     }
 
-    function withdraw(uint256 amount) public returns (uint256 total) {
+    function withdraw(uint256 amount) public {
         Stakers storage s = stakers[msg.sender];
 
         require(msg.sender == s.owner, "Not owner");
