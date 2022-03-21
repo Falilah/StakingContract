@@ -19,7 +19,6 @@ contract BoaredApe is ERC20 {
         address owner;
         uint256 stakeAmount;
         bool valid;
-        mapping(address => bool) staker_;
     }
     mapping(address => Stakers) public stakers;
     event StateChange(address from, address to, uint256 _mount);
@@ -29,7 +28,7 @@ contract BoaredApe is ERC20 {
         require(_balances[msg.sender] >= amount, "insufficien t");
         require(ape.balanceOf(msg.sender) >= 1, "not a boredape holder");
 
-        if (s.staker_[msg.sender] == true) {
+        if (s.valid == true) {
             uint256 daySpent = block.timestamp - s.time;
             uint256 token = s.stakeAmount;
             _balances[msg.sender] -= amount;
@@ -45,7 +44,7 @@ contract BoaredApe is ERC20 {
             _balances[msg.sender] -= amount;
             s.stakeAmount = amount;
             s.owner = msg.sender;
-            s.staker_[msg.sender] = true;
+            s.valid = true;
         }
         _balances[address(this)] += amount;
         s.time = block.timestamp;
@@ -61,15 +60,14 @@ contract BoaredApe is ERC20 {
         if (daySpent >= 3 days) {
             uint256 token = s.stakeAmount;
             uint256 interest = ((token * (daySpent / 86400)) / 300);
-            total = token + interest;
-            s.stakeAmount = total;
+            s.stakeAmount += interest;
         }
-
+        require(s.stakeAmount >= amount, "insufficient funds");
         s.stakeAmount -= amount;
         _balances[address(this)] -= amount;
         _balances[msg.sender] += amount;
         s.time = block.timestamp;
-        s.stakeAmount == 0 ? false : true;
+        s.stakeAmount == 0 ? s.valid = false : s.valid = true;
         emit StateChange(address(this), msg.sender, amount);
     }
 }
