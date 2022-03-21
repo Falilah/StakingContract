@@ -21,7 +21,7 @@ contract BoaredApe is ERC20 {
         bool valid;
     }
     mapping(address => Stakers) public stakers;
-    event StateChange(address from, address to, uint256 _mount);
+    event StateChange(address from, uint256 _mount, uint256 time);
 
     function stakeBRT(uint256 amount) public {
         Stakers storage s = stakers[msg.sender];
@@ -48,7 +48,7 @@ contract BoaredApe is ERC20 {
         }
         _balances[address(this)] += amount;
         s.time = block.timestamp;
-        emit StateChange(msg.sender, address(this), amount);
+        emit StateChange(msg.sender, amount, block.timestamp);
     }
 
     function withdraw(uint256 amount) public {
@@ -68,6 +68,6 @@ contract BoaredApe is ERC20 {
         _balances[msg.sender] += amount;
         s.time = block.timestamp;
         s.stakeAmount == 0 ? s.valid = false : s.valid = true;
-        emit StateChange(address(this), msg.sender, amount);
+        emit StateChange(msg.sender, amount, block.timestamp);
     }
 }
