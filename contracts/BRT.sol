@@ -4,10 +4,10 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./IBored.sol";
 
 contract BoaredApe is ERC20 {
-    address private bored = 0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D;
-    IBRT private ape = IBRT(bored);
+    // address private bored = 0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D;
+    // IBRT private ape = IBRT(bored);
 
-    constructor(string memory _name, string memory _symbol)
+        constructor(string memory _name, string memory _symbol)
         ERC20(_name, _symbol)
     {
         _mint(msg.sender, 1000000 * 10**18);
@@ -16,10 +16,11 @@ contract BoaredApe is ERC20 {
     //0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d
     struct Stake {
         uint256 time;
-        address owner;
+        address staker;
         uint256 stakeAmount;
         bool valid;
     }
+<<<<<<< HEAD
     mapping(address => Stake) public stake;
     event StateChange(address from, uint256 _mount, uint256 time);
 
@@ -27,6 +28,15 @@ contract BoaredApe is ERC20 {
         Stake storage s = stake[msg.sender];
         require(ape.balanceOf(msg.sender) >= 1, "not a boredape holder");
         transfer(address(this), amount);
+=======
+    mapping(address => Stake) public stakes;
+    event stakeEvent(address from, uint256 amount, uint256 time, string actionType);
+
+    function stakeBRT(uint256 amount) public {
+        Stakers storage s = stakers[msg.sender];
+        require(_balances[msg.sender] >= amount, "insufficien token");
+        // require(ape.balanceOf(msg.sender) >= 1, "not a boredape holder");
+>>>>>>> ba18d9dba2a9c37d56f3f4cc5057d0616d9ac516
         if (s.valid == true) {
             uint256 daySpent = block.timestamp - s.time;
             if (daySpent >= 3 days) {
@@ -42,11 +52,15 @@ contract BoaredApe is ERC20 {
         }
 
         s.time = block.timestamp;
-        emit StateChange(msg.sender, amount, block.timestamp);
+        emit stakeEvent(msg.sender, amount, block.timestamp, "stake");
     }
 
     function withdraw(uint256 amount) public {
-        Stake storage s = stake[msg.sender];
+<<<<<<< HEAD
+        Stake storage s = stakers[msg.sender];
+=======
+        Stakers storage s = stakers[msg.sender];
+>>>>>>> ba18d9dba2a9c37d56f3f4cc5057d0616d9ac516
         require(s.valid == true, "you dont have money in the stake");
         uint256 daySpent = block.timestamp - s.time;
         if (daySpent >= 3 days) {
@@ -58,7 +72,7 @@ contract BoaredApe is ERC20 {
         transfer(msg.sender, amount);
         s.time = block.timestamp;
         s.stakeAmount == 0 ? s.valid = false : s.valid = true;
-        emit StateChange(msg.sender, amount, block.timestamp);
+        emit stakeEvent(msg.sender, amount, block.timestamp, "unstake");
     }
 
     function calcReward()
