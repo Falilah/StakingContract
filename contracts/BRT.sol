@@ -20,7 +20,6 @@ contract BoaredApe is ERC20 {
         uint256 stakeAmount;
         bool valid;
     }
-<<<<<<< HEAD
     mapping(address => Stake) public stake;
     event StateChange(address from, uint256 _mount, uint256 time);
 
@@ -28,15 +27,6 @@ contract BoaredApe is ERC20 {
         Stake storage s = stake[msg.sender];
         require(ape.balanceOf(msg.sender) >= 1, "not a boredape holder");
         transfer(address(this), amount);
-=======
-    mapping(address => Stake) public stakes;
-    event stakeEvent(address from, uint256 amount, uint256 time, string actionType);
-
-    function stakeBRT(uint256 amount) public {
-        Stakers storage s = stakers[msg.sender];
-        require(_balances[msg.sender] >= amount, "insufficien token");
-        // require(ape.balanceOf(msg.sender) >= 1, "not a boredape holder");
->>>>>>> ba18d9dba2a9c37d56f3f4cc5057d0616d9ac516
         if (s.valid == true) {
             uint256 daySpent = block.timestamp - s.time;
             if (daySpent >= 3 days) {
@@ -56,11 +46,7 @@ contract BoaredApe is ERC20 {
     }
 
     function withdraw(uint256 amount) public {
-<<<<<<< HEAD
         Stake storage s = stakers[msg.sender];
-=======
-        Stakers storage s = stakers[msg.sender];
->>>>>>> ba18d9dba2a9c37d56f3f4cc5057d0616d9ac516
         require(s.valid == true, "you dont have money in the stake");
         uint256 daySpent = block.timestamp - s.time;
         if (daySpent >= 3 days) {
