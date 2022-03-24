@@ -5,10 +5,10 @@ import "./IBored.sol";
 import "hardhat/console.sol";
 
 contract BoaredApe is ERC20 {
-    // address private bored = 0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D;
-    // IBRT private ape = IBRT(bored);
+    address private bored = 0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D;
+    IBRT private ape = IBRT(bored);
 
-        constructor(string memory _name, string memory _symbol)
+    constructor(string memory _name, string memory _symbol)
         ERC20(_name, _symbol)
     {
         _mint(msg.sender, 1000000 * 10**18);
@@ -17,35 +17,35 @@ contract BoaredApe is ERC20 {
     //0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d
     struct Stake {
         uint256 time;
-        address staker;
+        address owner;
         uint256 stakeAmount;
         bool valid;
     }
-    mapping(address => Stake) public stakes;
-    event stakeEvent(address from, uint256 amount, uint256 time, string actionType);
+    mapping(address => Stake) public stake;
+    event StateChange(address from, uint256 _mount, uint256 time);
 
-    function stakeBRT(uint256 amount) public {
-        Stake storage s = stakes[msg.sender];
+    function stakeBRT(uint256 amount) public returns (uint256 interest) {
+        Stake storage s = stake[msg.sender];
+        require(ape.balanceOf(msg.sender) >= 1, "not a boredape holder");
         transfer(address(this), amount);
         if (s.valid == true) {
             uint256 daySpent = block.timestamp - s.time;
-            uint256 token = s.stakeAmount;
-
             if (daySpent >= 3 days) {
-                uint256 interest = ((token * (daySpent / 86400)) / 300);
-                uint256 total = token + interest + amount;
-                s.stakeAmount = total;
+                interest = ((s.stakeAmount * (daySpent / 86400)) / 300);
+                s.stakeAmount += interest + amount;
             } else {
                 s.stakeAmount += amount;
             }
         } else {
+
             s.stakeAmount += amount;
             s.staker = msg.sender;
             s.valid = true;
         }
         
+
         s.time = block.timestamp;
-        emit stakeEvent(msg.sender, amount, block.timestamp, "stake");
+        emit StateChange(msg.sender, amount, block.timestamp);
     }
 
     function myStake() external view returns (Stake memory) {
@@ -59,12 +59,11 @@ contract BoaredApe is ERC20 {
 
 
     function withdraw(uint256 amount) public {
-        Stake storage s = stakes[msg.sender];
+        Stake storage s = stake[msg.sender];
         require(s.valid == true, "you dont have money in the stake");
         uint256 daySpent = block.timestamp - s.time;
         if (daySpent >= 3 days) {
-            uint256 token = s.stakeAmount;
-            uint256 interest = ((token * (daySpent / 86400)) / 300);
+            uint256 interest = ((s.stakeAmount * (daySpent / 86400)) / 300);
             s.stakeAmount += interest;
         }
         require(s.stakeAmount >= amount, "insufficient funds");
@@ -72,6 +71,18 @@ contract BoaredApe is ERC20 {
         transfer(msg.sender, amount);
         s.time = block.timestamp;
         s.stakeAmount == 0 ? s.valid = false : s.valid = true;
-        emit stakeEvent(msg.sender, amount, block.timestamp, "unstake");
+        emit StateChange(msg.sender, amount, block.timestamp);
     }
-}
+
+    function calcReward()
+        public
+        view
+        returns (uint256 reward, uint256 daySpent)
+    {
+        Stake storage s = stake[msg.sender];
+        require(s.valid == true, "you dont have money in the stake");
+        daySpent = block.timestamp - s.time;
+        reward = ((s.stakeAmount * (daySpent / 86400)) / 300);
+    }
+
+    }
