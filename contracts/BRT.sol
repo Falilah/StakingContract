@@ -46,7 +46,11 @@ contract BoaredApe is ERC20 {
     }
 
     function withdraw(uint256 amount) public {
+<<<<<<< HEAD
         Stake storage s = stake[msg.sender];
+=======
+        Stake storage s = stake[msg.sender];
+>>>>>>> 7bbd71d65515d3680817f47757e677d16969fca7
         require(s.valid == true, "you dont have money in the stake");
         uint256 daySpent = block.timestamp - s.time;
         if (daySpent >= 3 days) {
