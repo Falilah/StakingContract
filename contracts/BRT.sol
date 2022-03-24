@@ -13,7 +13,6 @@ contract BoaredApe is ERC20 {
         _mint(msg.sender, 1000000 * 10**18);
     }
 
-    //0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d
     struct Stake {
         uint256 time;
         address owner;
@@ -25,7 +24,7 @@ contract BoaredApe is ERC20 {
 
     function stakeBRT(uint256 amount) public returns (uint256 interest) {
         Stake storage s = stake[msg.sender];
-        require(ape.balanceOf(msg.sender) >= 1, "not a boredape holder");
+        // require(ape.balanceOf(msg.sender) >= 1, "not a boredape holder");
         transfer(address(this), amount);
         if (s.valid == true) {
             uint256 daySpent = block.timestamp - s.time;
@@ -46,11 +45,8 @@ contract BoaredApe is ERC20 {
     }
 
     function withdraw(uint256 amount) public {
-<<<<<<< HEAD
         Stake storage s = stake[msg.sender];
-=======
-        Stake storage s = stake[msg.sender];
->>>>>>> 7bbd71d65515d3680817f47757e677d16969fca7
+
         require(s.valid == true, "you dont have money in the stake");
         uint256 daySpent = block.timestamp - s.time;
         if (daySpent >= 3 days) {
