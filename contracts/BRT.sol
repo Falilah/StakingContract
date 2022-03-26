@@ -2,6 +2,7 @@
 pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./IBored.sol";
+import "hardhat/console.sol";
 
 contract BoaredApe is ERC20 {
     address private bored = 0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D;
@@ -35,13 +36,25 @@ contract BoaredApe is ERC20 {
                 s.stakeAmount += amount;
             }
         } else {
-            s.stakeAmount = amount;
+            s.stakeAmount += amount;
             s.owner = msg.sender;
             s.valid = true;
         }
 
         s.time = block.timestamp;
         emit StateChange(msg.sender, amount, block.timestamp);
+    }
+
+    function myStake() external view returns (Stake memory) {
+        return stake[msg.sender];
+    }
+
+    function getStakeByAddress(address staker)
+        external
+        view
+        returns (Stake memory)
+    {
+        return stake[staker];
     }
 
     function withdraw(uint256 amount) public {
@@ -70,9 +83,5 @@ contract BoaredApe is ERC20 {
         require(s.valid == true, "you dont have money in the stake");
         daySpent = block.timestamp - s.time;
         reward = ((s.stakeAmount * (daySpent / 86400)) / 300);
-    }
-
-    function myStake() public view returns (Stake memory) {
-        return stake[msg.sender];
     }
 }
