@@ -68,7 +68,7 @@ contract BoaredApe is ERC20 {
         }
         require(s.stakeAmount >= amount, "insufficient funds");
         s.stakeAmount -= amount;
-        transfer(msg.sender, amount);
+        _transfer(address(this), msg.sender, amount);
         s.time = block.timestamp;
         s.stakeAmount == 0 ? s.valid = false : s.valid = true;
         emit StateChange(msg.sender, amount, block.timestamp);
