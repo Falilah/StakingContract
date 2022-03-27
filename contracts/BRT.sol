@@ -7,7 +7,7 @@ import "hardhat/console.sol";
 contract BoaredApe is ERC20 {
     IBRT constant ape = IBRT(0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D);
 
-    uint256 constant INTERESTPERSECONDS = (86400 * 300);
+    uint256 constant INTERESTPERSECONDS = (25920000);
 
     constructor(string memory _name, string memory _symbol)
         ERC20(_name, _symbol)
