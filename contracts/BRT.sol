@@ -26,7 +26,7 @@ contract BoaredApe is ERC20 {
 
     function stakeBRT(uint256 amount) public returns (uint256 interest) {
         Stake storage s = stake[msg.sender];
-        // require(ape.balanceOf(msg.sender) >= 1, "not a boredape holder");
+        require(ape.balanceOf(msg.sender) >= 1, "not a boredape holder");
         transfer(address(this), amount);
         if (s.valid == true) {
             uint256 secondsSpent = block.timestamp - s.time;
