@@ -1,57 +1,26 @@
-import { messagePrefix } from "@ethersproject/hash";
-import { Signer } from "ethers";
 import { ethers } from "hardhat";
 
-async function main() {
-  // We get the contract to deploy
-  // const owner = "0x27E936b199a8EEb3980c468fc1802f1Ef78b1625";
-  const owner = (await ethers.getSigners())[0].address;
-
-  const boredaper = "0xcee749f1cfc66cd3fb57cefde8a9c5999fbe7b8f";
-
-  const signerss = await ethers.getSigners;
-
-  // @ts-ignore
-  await network.provider.send("hardhat_setBalance", [
-    owner,
-    "0x100000000000000000000",
-  ]);
-
-  // @ts-ignore
-  await hre.network.provider.request({
-    method: "hardhat_impersonateAccount",
-    params: [boredaper],
-  });
-
-  const border: Signer = await ethers.getSigner(boredaper);
-
-  const staking = await ethers.getContractFactory("BoaredApe");
-  const deployStaking = await staking.deploy("BoredApe", "BRT");
+async function verify() {
+  const staking = await ethers.getContractFactory("W3BToken");
+  const deployStaking = await staking.deploy("Web3Bridge", "W3B");
 
   await deployStaking.deployed();
   console.log("staking address", deployStaking.address);
+  console.log("Sleeping.....");
+  // Wait for etherscan to notice that the contract has been deployed
+  await sleep(100000);
 
-  const transfer_ = await deployStaking.transfer(boredaper, "1000000000000");
-  // console.log(transfer_);
-  const stake = await deployStaking.connect(border).stakeBRT("1000000000");
-  console.log("BRT owner", await deployStaking.balanceOf(boredaper));
-
+  // Verify the contract after deploying
   //@ts-ignore
-  await hre.network.provider.send("hardhat_mine", ["0x14"]);
-  //@ts-ignore
-  await hre.network.provider.send("hardhat_mine", ["0x14", "0x3F480"]);
-
-  const Unstake = await deployStaking.connect(border).withdrawBRT("1000");
-  console.log("BRT owner", await deployStaking.balanceOf(boredaper));
-
-  // const contractbal = await deployStaking.balanceOf(deployStaking.address);
-  // const ownerbal = await deployStaking.balanceOf(owner);
-  // console.log(bal, contractbal, ownerbal);
+  await hre.run("verify:verify", {
+    address: deployStaking.address,
+    constructorArguments: ["Web3Bridge", "W3B"],
+  });
 }
-
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main().catch((error) => {
+function sleep(ms: any) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+verify().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
