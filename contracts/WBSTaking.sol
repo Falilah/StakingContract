@@ -1,13 +1,11 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "./IBored.sol";
+import "./IW3B.sol";
 import "hardhat/console.sol";
 
-contract BoaredApe is ERC20 {
-    IBRT constant ape = IBRT(0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D);
-
-    uint256 constant INTERESTPERSECONDS = (25920000);
+contract W3BToken is ERC20 {
+    IW3B constant W3B = IW3B(0x524108C1261dc8CA5A6AE5E188CA020220d87D75);
 
     constructor(string memory _name, string memory _symbol)
         ERC20(_name, _symbol)
@@ -26,12 +24,12 @@ contract BoaredApe is ERC20 {
 
     function stakeBRT(uint256 amount) public returns (uint256 interest) {
         Stake storage s = stake[msg.sender];
-        require(ape.balanceOf(msg.sender) >= 1, "not a boredape holder");
+        require(W3B.balanceOf(msg.sender) >= 1, "not a w3bNFT holder");
         transfer(address(this), amount);
         if (s.valid == true) {
             uint256 secondsSpent = block.timestamp - s.time;
             if (secondsSpent >= 259200) {
-                interest = (secondsSpent / INTERESTPERSECONDS) * s.stakeAmount;
+                interest = (s.stakeAmount * 386 * secondsSpent) / 1000000000;
                 s.stakeAmount += interest + amount;
             } else {
                 s.stakeAmount += amount;
@@ -52,8 +50,8 @@ contract BoaredApe is ERC20 {
         require(s.valid == true, "you dont have money in the stake");
         uint256 secondsSpent = block.timestamp - s.time;
         if (secondsSpent >= 259200) {
-            uint256 interest = (secondsSpent / INTERESTPERSECONDS) *
-                s.stakeAmount;
+            uint256 interest = (s.stakeAmount * 386 * secondsSpent) /
+                1000000000;
             s.stakeAmount += interest;
         }
         require(s.stakeAmount >= amount, "insufficient funds");
@@ -76,6 +74,6 @@ contract BoaredApe is ERC20 {
         Stake storage s = stake[msg.sender];
         require(s.valid == true, "you dont have money in the stake");
         secondsSpent = block.timestamp - s.time;
-        reward = (secondsSpent / INTERESTPERSECONDS) * s.stakeAmount;
+        reward = (s.stakeAmount * 386 * secondsSpent) / 1000000000;
     }
 }

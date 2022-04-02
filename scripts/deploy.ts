@@ -7,23 +7,23 @@ async function main() {
   // const owner = "0x27E936b199a8EEb3980c468fc1802f1Ef78b1625";
   const owner = (await ethers.getSigners())[0].address;
 
-  // const boredaper = "0xcee749f1cfc66cd3fb57cefde8a9c5999fbe7b8f";
+  const boredaper = "0xcee749f1cfc66cd3fb57cefde8a9c5999fbe7b8f";
 
-  // const signerss = await ethers.getSigners;
+  const signerss = await ethers.getSigners;
 
-  //@ts-ignore
-  // await network.provider.send("hardhat_setBalance", [
-  //   owner,
-  //   "0x100000000000000000000",
-  // ]);
+  // @ts-ignore
+  await network.provider.send("hardhat_setBalance", [
+    owner,
+    "0x100000000000000000000",
+  ]);
 
-  //@ts-ignore
-  // await hre.network.provider.request({
-  //   method: "hardhat_impersonateAccount",
-  //   params: [boredaper],
-  // });
+  // @ts-ignore
+  await hre.network.provider.request({
+    method: "hardhat_impersonateAccount",
+    params: [boredaper],
+  });
 
-  // const border: Signer = await ethers.getSigner(boredaper);
+  const border: Signer = await ethers.getSigner(boredaper);
 
   const staking = await ethers.getContractFactory("BoaredApe");
   const deployStaking = await staking.deploy("BoredApe", "BRT");
@@ -31,11 +31,19 @@ async function main() {
   await deployStaking.deployed();
   console.log("staking address", deployStaking.address);
 
-  // const transfer_ = await deployStaking.transfer(boredaper, "1000000000000");
-  // // console.log(transfer_);
-  // const stake = await deployStaking.connect(border).stakeBRT("1000000000");
+  const transfer_ = await deployStaking.transfer(boredaper, "1000000000000");
+  // console.log(transfer_);
+  const stake = await deployStaking.connect(border).stakeBRT("1000000000");
+  console.log("BRT owner", await deployStaking.balanceOf(boredaper));
 
-  // const bal = await deployStaking.balanceOf(boredaper);
+  //@ts-ignore
+  await hre.network.provider.send("hardhat_mine", ["0x14"]);
+  //@ts-ignore
+  await hre.network.provider.send("hardhat_mine", ["0x14", "0x3F480"]);
+
+  const Unstake = await deployStaking.connect(border).withdrawBRT("1000");
+  console.log("BRT owner", await deployStaking.balanceOf(boredaper));
+
   // const contractbal = await deployStaking.balanceOf(deployStaking.address);
   // const ownerbal = await deployStaking.balanceOf(owner);
   // console.log(bal, contractbal, ownerbal);
